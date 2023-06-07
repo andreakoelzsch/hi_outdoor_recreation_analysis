@@ -2,7 +2,7 @@
 
 MoveApps
 
-Github repository: *github.com/yourAccount/Name-of-App* *(the link to the repository where the code of the app can be found must be provided)*
+Github repository: *https://github.com/MattK-16/hi_outdoor_recreation_analysis/*
 
 ## Description
 Compute the intensity of human activity associated with each GPS point in a MovingPandas TrajectoryCollection based on the RGBA values and distance of Strava Global Heatmap pixels. 

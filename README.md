@@ -42,7 +42,7 @@ The final text should be of the format:
 
 Key-Pair-ID=...Policy=...Signature=...__
 
-Copy and paste this text as the parameter for the Strava Cookie Values field in the tool.
+Copy and paste this text as the parameter for the Strava Cookie Values field in the app.
 
 #### Obtain Cookies Using Browser Console
 As an alternative to using one of the browser extensions, the cookies can be retrieved from the console. After logging in and navigating to the [Strava Global Heatmap](www.strava.com/heatmap). Right click the page and select the 'Inspect' option (Source: www.strava.com/heatmap):
@@ -64,7 +64,7 @@ These values will need to be formatted in the following way:
 
 Key-Pair-Id=\[your Cloudfront-Key-Pair-Id\]&Policy=\[your Cloudfront-Policy\]&Signature=\[your Cloudfront-Signature\]
 
-Copy and paste this text as the parameter for the Strava Cookie Values that the tool prompts for.
+Copy and paste this text as the parameter for the Strava Cookie Values that the app prompts for.
 
 ### Output data
 MovingPandas TrajectoryCollection in Movebank format.

@@ -1,45 +1,41 @@
 {
-  "settings": [],
+  "settings": [
+    {
+      "id": "keys",
+      "name": "Strava Cookie Values",
+      "description": "Key-Pair-ID, Signature, and Policy, properly formatted. Please see the app documentation for details.",
+      "defaultValue": null,
+      "type": "STRING"
+    }
+  ],
   "providedAppFiles": [],
-  "createsArtifacts": false,
+  "createsArtifacts": true,
   "license": {
     "key": "MIT"
   },
   "language": "eng",
   "keywords": [
-    "example",
-    "template"
+    "outdoor recreation",
+    "GIS",
+    "human infrastructure"
   ],
   "people": [
     {
-      "firstName": "Charles",
+      "firstName": "Matthew",
       "middleInitials": null,
-      "lastName": "Darwin",
-      "email": "creator@example.com",
+      "lastName": "Ketchin",
+      "email": "mketchin@uwo.ca",
       "roles": [
         "author",
         "creator"
       ],
       "orcid": null,
-      "affiliation": null,
+      "affiliation": "The University of Western Ontario",
       "affiliationRor": null
     }
   ],
-  "funding": [
-    {
-      "name": "funder name",
-      "comment": "grant for App"
-    }
-  ],
-  "references": [
-    {
-      "type": "IsDescribedBy",
-      "note": "Darwin, C. 1900. The creation. Journal XY. 1-2",
-      "url": "https://anylink.xyz"
-    }
-  ],
   "documentation": {
-    "url": "https://github.com/yourAccount/my-app/README.md"
+    "url": "https://github.com/MattK-16/hi_outdoor_recreation_analysis/README.md"
   }
 }
 

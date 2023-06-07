@@ -1,43 +1,105 @@
-# {Name of App}
-
-*Give your app a short and informative title. Please adhere to our convention of Title Case without hyphens (e.g. `My New App`)*
+# HI Outdoor Recreation Analysis
 
 MoveApps
 
 Github repository: *github.com/yourAccount/Name-of-App* *(the link to the repository where the code of the app can be found must be provided)*
 
-## SDK
-
-As an **App developer** you should have a look into the [developer README document](developer_README.md). 
-*Please delete this section for your final app documentation*
-
 ## Description
-*Enter here the short description of the App that might also be used when filling out the description at submission of the App to Moveapps. This text is directly presented to Users that look through the list of Apps when compiling Workflows.*
+Compute the intensity of human activity associated with each GPS point in a MovingPandas TrajectoryCollection based on the RGBA values and distance of Strava Global Heatmap pixels. 
 
 ## Documentation
-*Enter here a detailed description of your App. What is it intended to be used for. Which steps of analyses are performed and how. Please be explicit about any detail that is important for use and understanding of the App and its outcomes.*
+This app determines the distance that GPS points are from human activity hotspots as indicated by the blue version of the Strava Global Heatmap. RGBA values are extracted from the heatmap at a 100m resolution for the extent of the MovingPandas TrajectoryCollection that is passed to the app. RGBA values are assigned to each point based on an intersection between the points provided and the Strava Global Heatmap. An intensity value closer to 1 indicates a higher relative intensity of use and a value closer to 0 indicates a lower relative intensity of use. This information is added to the MovingPandas TrajectoryCollection that is given at the start of this process.
 
 ### Input data
-*Indicate which type of input data the App requires. Currently only R objects of class `MoveStack` can be used. This will be extend in the future.*
+MovingPandas TrajectoryCollection in Movebank format is accepted as input. Additionally, a Cloudfront-Key-Pair-ID, Cloudfront-Policy, and Cloudfront-Signature will be needed from the [Strava Global Heatmap](www.strava.com/heatmap). The information can be acquired in a number of different ways as illustrated in the following sections. It is important to note that a **Strava User Account** is needed for this App to function properly.  
 
-*Example*: MovingPandas TrajectoryCollection in Movebank format
+#### Obtain Cookie Values Using Browser Extension
+The pertinent Strava information can be obtained using already designed tools that extract this information. It is available as a plugin in [Chrome](https://chrome.google.com/webstore/detail/josm-strava-heatmap/) and [Firefox](https://addons.mozilla.org/en-US/firefox/addon/josm-strava-heatmap/). After downloading one of these tools, navigate to the Strava Global Heatmap, log in to the website, and click the tool to generate the necessary url.
+
+Firefox (Source: https://addons.mozilla.org/en-US/firefox/addon/josm-strava-heatmap/):
+![Firefox Plugin Page](./documentation/firefoxStravaPlugin.png)
+
+Chrome (Source: https://chrome.google.com/webstore/detail/josm-strava-heatmap/):
+![Chrome Plugin Page](./documentation/chromeStravaPlugin.png)
+
+
+After installing one of these two tools, navigate to the [Strava Global Heatmap](www.strava.com/heatmap) and log in to your account. You will be presented with a screen similar to this (Source: www.strava.com/heatmap):
+
+![Strava Global Heatmap](./documentation/stravaHeatmapWithButton.png)
+
+
+Press the button highlighted in red and the JOSM screen will appear (Source: www.strava.com/heatmap):
+
+![JOSM Tool Screen](./documentation/keyPolicySigFormat.png)
+
+
+Highlight all of the text to the end of the URL starting at and including the Key-Pair-ID text (Source: www.strava.com/heatmap):
+
+![JOSM Tool Highlighted Text](./documentation/keyPolicySigFormatHighlighted.png)
+
+
+The final text should be of the format:
+
+Key-Pair-ID=...Policy=...Signature=...__
+
+Copy and paste this text as the parameter for the Strava Cookie Values field in the tool.
+
+#### Obtain Cookies Using Browser Console
+As an alternative to using one of the browser extensions, the cookies can be retrieved from the console. After logging in and navigating to the [Strava Global Heatmap](www.strava.com/heatmap). Right click the page and select the 'Inspect' option (Source: www.strava.com/heatmap):
+
+![Inspect Option](./documentation/consoleInspect.png)
+
+
+On the developer console that appears navigate to the "Application" tab on the header (Source: www.strava.com/heatmap):
+
+![Console View](./documentation/consoleView.png)
+
+
+Select 'Cookies' on the side menu and the strava.com option. From within this you will need to copy the CloudFront-Key-Pair-Id, CloudFront-Policy, and CloudFront-Signature values (Source: www.strava.com/heatmap):
+
+![Cloudfront Values](./documentation/consoleCookieLocation.png)
+
+
+These values will need to be formatted in the following way:
+
+Key-Pair-Id=\[your Cloudfront-Key-Pair-Id\]&Policy=\[your Cloudfront-Policy\]&Signature=\[your Cloudfront-Signature\]
+
+Copy and paste this text as the parameter for the Strava Cookie Values that the tool prompts for.
 
 ### Output data
-*Indicate which type of output data the App produces to be passed on to subsequent apps. Currently only R objects of class `MoveStack` can be used. This will be extend in the future. In case the App does not pass on any data (e.g. a shiny visualization app), it can be also indicated here that no output is produced to be used in subsequent apps.*
+MovingPandas TrajectoryCollection in Movebank format.
 
-*Example:* MovingPandas TrajectoryCollection in Movebank format
+#### Visualisation
+
+![Visualisation](./documentation/readMeImage.png)
+Map depicting the locations of fishers from a larger dataset in Albany, New York (LaPoint et al. 2013). Points coloured white indicate no Strava heatmap data associated with the point and points with colour reflect the colour of the Strava pixel they intersect with. This visualisation was produced using the output of this app and is not included as an artefact.
+
+Citation:
+LaPoint, S, Gallery P, Wikelski M, Kays R (2013) Animal behavior, cost-based corridor models, and real corridors. Landscape Ecology, v 28 i 8, p 1615–1630. doi:10.1007/s10980-013-9910-0
 
 ### Artefacts
-*If the App creates artefacts (e.g. csv, pdf, jpeg, shapefiles, etc), please list them here and describe each.*
+`band1.png`: PNG displaying a histogram of red band values with a log transformed Y axis.
 
-*Example:* `rest_overview.csv`: csv-file with Table of all rest site properties
+`band2.png`: PNG displaying a histogram of blue band values with a log transformed Y axis.
+
+`band3.png`: PNG displaying a histogram of green band values with a log transformed Y axis.
+
+`intensity.png`: PNG displaying a histogram of intensity values with a log transformed Y axis.
+
+`intersections.png`: PNG displaying number of points that intersect a Strava pixel.
 
 ### Settings 
-*Please list and define all settings/parameters that the App requires to be set, if necessary including their unit.*
 
-*Example:* `Radius of resting site` (radius): Defined radius the animal has to stay in for a given duration of time for it to be considered resting site. Unit: `metres`.
+`Strava Cookie Values` (text): Cloudfront Key-Pair-ID, Policy, and Signature values required from your Strava account. These values are used to access the TMS that Strava hosts. 
+
+### Note on the data
+
+The Strava Global Heatmap is a proprietary product created by Strava Inc. that is updated monthly. Pixel values associated with each of the points that is passed to the app are collected. These collected values represent the pixel values of the most recent Strava Global Heatmap at the time of query. The values **do not** represent the intensity of use during the time that the trajectory was collected. There is no historical data collected. For example, if a MovingPandas TrajectoryCollection tracking a single Canada Goose from March 3, 2018 to March 16, 2018 is submitted as input to this app on May 10, 2023, the values attached to the output will reflect the values of the Strava Global Heatmap as of May 10, 2023. 
 
 ### Null or error handling
-*Please indicate for each setting/parameter as well as the input data which behaviour the App is supposed to show in case of errors or NULL values/input. Please also add notes of possible errors that can happen if settings are improperly set and any other important information that you find the user should be aware of.*
 
-*Example:* **Setting `radius`:** If no radius AND no duration are given, the input data set is returned with a warning. If no radius is given (NULL), but a duration is defined then a default radius of 1000m = 1km is set. 
+**Setting `Strava Cookie Values`:** If no cookie values are given or they are given in the incorrect format, the app will not run.
+
+**Common Errors:** Large datasets can take a long time to process. If a dataset with a large geographic extent (hundreds of kilometres) is passed with many GPS points, the app can take hours to run. 
+
+**Other Errors:** Any other error is reported as plain text in the error log.

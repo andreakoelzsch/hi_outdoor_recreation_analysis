@@ -149,9 +149,11 @@ dependencies:
   - pillow=9.5.0
   - pip=23.1.2
   - pixman=0.40.0
+  - platformdirs=3.5.1
   - plotly=5.14.1
   - pluggy=1.0.0
   - ply=3.11
+  - pooch=1.7.0
   - poppler=23.05.0
   - poppler-data=0.4.12
   - postgresql=15.3
@@ -183,6 +185,7 @@ dependencies:
   - readline=8.2
   - requests=2.31.0
   - rtree=1.0.1
+  - scipy=1.10.1
   - setuptools=67.7.2
   - shapely=2.0.1
   - sip=6.7.9
@@ -196,6 +199,8 @@ dependencies:
   - tk=8.6.12
   - toml=0.10.2
   - tomli=2.0.1
+  - typing-extensions=4.6.3
+  - typing_extensions=4.6.3
   - tzcode=2023c
   - tzdata=2023c
   - unicodedata2=15.0.0

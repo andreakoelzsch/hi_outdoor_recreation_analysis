@@ -128,6 +128,7 @@ dependencies:
   - pip=23.1.2
   - pixman=0.40.0
   - plotly=5.14.1
+  - pluggy=1.0.0
   - ply=3.11
   - poppler=23.05.0
   - poppler-data=0.4.12

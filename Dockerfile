@@ -8,9 +8,12 @@ WORKDIR $PROJECT_DIR
 
 USER root
 RUN chown -R $MAMBA_USER:$MAMBA_USER $PROJECT_DIR
+RUN apt-get update \
+    # fix for: `ImportError: libGL.so.1: cannot open shared object file: No such file or directory`
+    && apt-get install ffmpeg libsm6 libxext6  -y
 
 USER $MAMBA_USER
-COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yml ./
+COPY --chown=$MAMBA_USER:$MAMBA_USER environment-moveapps.yml ./environment.yml
 RUN micromamba install -y -n base -f ./environment.yml && \
     micromamba clean --all --yes
 

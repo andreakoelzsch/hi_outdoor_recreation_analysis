@@ -167,6 +167,7 @@ dependencies:
   - pysocks=1.7.1
   - python=3.9.16
   - python-dateutil=2.8.2
+  - python-dotenv=1.0.0
   - python-tzdata=2023.3
   - python_abi=3.9
   - pytz=2023.3

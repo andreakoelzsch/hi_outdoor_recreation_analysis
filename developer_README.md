@@ -77,10 +77,19 @@ Nothing else.
 
 ## App development
 
-1. Create the conda environment by `conda env create -n APP_NAME --file environment.yml`
+### Setup the conda environment
+
+1. Define the name of the environment `export ENV_NAME=<name of your environment>`
+1. Create the conda environment by `conda env create -n $ENV_NAME --file environment.yml`
+1. Activate the environment by `conda env activate -n $ENV_NAME`
 1. Execute `python sdk.py`
 1. Ensure the sdk executes the vanilla template App code. Everything is set up correctly if no error occurs and you see something like _Welcome to the MoveApps Python SDK._
 1. Begin with your App development in `./app/app.py`
+
+### Install app dependencies
+
+1. install a python library to the currently activated environment: `conda install <LIB_NAME> --channel conda-forge`
+1. update the YAML file: `conda env export --no-builds > environment.yml`
 
 ---
 

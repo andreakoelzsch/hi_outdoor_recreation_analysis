@@ -2,10 +2,11 @@ FROM mambaorg/micromamba:1.2.0-bullseye-slim
 LABEL org.opencontainers.image.authors="us@couchbits.com"
 LABEL org.opencontainers.image.vendor="couchbits GmbH"
 
-# the app
+# the app location
 ENV PROJECT_DIR /moveapps-python-sdk
 WORKDIR $PROJECT_DIR
 
+# the OS depedencies
 USER root
 RUN chown -R $MAMBA_USER:$MAMBA_USER $PROJECT_DIR
 RUN apt-get update \
@@ -13,6 +14,7 @@ RUN apt-get update \
     && apt-get install ffmpeg libsm6 libxext6  -y
 
 USER $MAMBA_USER
+# the conda dependencies
 COPY --chown=$MAMBA_USER:$MAMBA_USER environment-moveapps.yml ./environment.yml
 RUN micromamba install -y -n base -f ./environment.yml && \
     micromamba clean --all --yes
@@ -25,4 +27,5 @@ COPY --chown=$MAMBA_USER:$MAMBA_USER app/ ./app/
 
 RUN micromamba run -n base python -m unittest
 # this is the working conda env file for the target runtime
+# please provide this file in `./environment-moveapps.yml`
 RUN cat ./environment.yml

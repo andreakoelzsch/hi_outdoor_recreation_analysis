@@ -26,6 +26,3 @@ COPY --chown=$MAMBA_USER:$MAMBA_USER tests/ ./tests/
 COPY --chown=$MAMBA_USER:$MAMBA_USER app/ ./app/
 
 RUN micromamba run -n base python -m unittest
-# this is the working conda env file for the target runtime
-# please provide this file in `./environment-moveapps.yml`
-RUN cat ./environment.yml

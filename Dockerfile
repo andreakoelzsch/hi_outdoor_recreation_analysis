@@ -15,7 +15,7 @@ RUN apt-get update \
 
 USER $MAMBA_USER
 # the conda dependencies
-COPY --chown=$MAMBA_USER:$MAMBA_USER environment-moveapps.yml ./environment.yml
+COPY --chown=$MAMBA_USER:$MAMBA_USER environment-moveapps-amd64.yml ./environment.yml
 RUN micromamba install -y -n base -f ./environment.yml && \
     micromamba clean --all --yes
 

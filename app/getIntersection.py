@@ -39,9 +39,14 @@ def convertToGeoPandasFrame(data):
 def qgsAppInit():
     ##set the path to the qgis bin
     try:
-        # kudos: https://gis.stackexchange.com/a/263853
-        os.environ["QT_QPA_PLATFORM"] = "offscreen"
-        QgsApplication.setPrefixPath("/usr", False)
+        if (os.environ.get('LOCAL_DEV', 'off') == 'on'):
+            # local development
+            QgsApplication.setPrefixPath("./Library/bin/", True)
+        else:
+            # running in production (aka on MoveApps)
+            # kudos: https://gis.stackexchange.com/a/263853
+            os.environ["QT_QPA_PLATFORM"] = "offscreen"
+            QgsApplication.setPrefixPath("/usr", False)
     except Exception as e:
         print("Error setting application path. \n" + str(e))
 

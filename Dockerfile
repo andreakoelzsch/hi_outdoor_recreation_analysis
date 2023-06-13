@@ -12,7 +12,7 @@ RUN chown -R $MAMBA_USER:$MAMBA_USER $PROJECT_DIR
 RUN apt-get update \
     && apt-get install -y \
     # install qgis
-    qgis python-qgis qgis-plugin-grass \
+    qgis qgis-plugin-grass \
     # fix for: `ImportError: libGL.so.1: cannot open shared object file: No such file or directory`
     ffmpeg libsm6 libxext6
 

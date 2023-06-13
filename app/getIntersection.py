@@ -12,6 +12,7 @@ import movingpandas as mpd
 from shapely.geometry import Point
 from scipy.spatial import cKDTree
 import math
+import os
 
 #convert the movingpandas trajectorycollection to a geopandas dataframe to work with
 def convertToGeoPandasFrame(data):
@@ -37,8 +38,10 @@ def convertToGeoPandasFrame(data):
 #initialize the qgis environment
 def qgsAppInit():
     ##set the path to the qgis bin
-    try: 
-        QgsApplication.setPrefixPath("./Library/bin/", True)
+    try:
+        # kudos: https://gis.stackexchange.com/a/263853
+        os.environ["QT_QPA_PLATFORM"] = "offscreen"
+        QgsApplication.setPrefixPath("/usr", False)
     except Exception as e:
         print("Error setting application path. \n" + str(e))
 

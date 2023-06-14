@@ -1,21 +1,14 @@
-from qgis.core import *
-import pyproj
-import urllib.parse
 import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use('agg')
-import time
 import numpy as np
-import pandas as pd
 import geopandas as gpd
 import movingpandas as mpd
 from shapely.geometry import Point
 from scipy.spatial import cKDTree
 import math
-import os
 
-#convert the movingpandas trajectorycollection to a geopandas dataframe to work with
-def convertToGeoPandasFrame(data):
+def convertToPointGpd(data):
     #read the testing dataset
     traj = data
 
@@ -35,145 +28,8 @@ def convertToGeoPandasFrame(data):
 
     return frame
 
-#convert to a line gdf
-def convertToLineGDF(data):
-    traj = data
-    frame = traj.to_line_gdf()
-    if frame.crs != None:
-        frame = frame.to_crs('EPSG:3857')
-    else:
-        frame = frame.set_crs('EPSG:3857')
-    merged_gdf = frame.dissolve(by='trackId')
-    print(merged_gdf)
-    print(merged_gdf.columns.to_list())
-    print(frame)
-    traj = mpd.TrajectoryCollection(frame, "trackId", t="timestamps", crs=frame.crs)
-    print(traj)
-    exit()
-
-#initialize the qgis environment
-def qgsAppInit():
-    ##set the path to the qgis bin
-    try:
-        if (os.environ.get('LOCAL_DEV', 'off') == 'on'):
-            # local development
-            QgsApplication.setPrefixPath("./Library/bin/", True)
-        else:
-            # running in production (aka on MoveApps)
-            # kudos: https://gis.stackexchange.com/a/263853
-            os.environ["QT_QPA_PLATFORM"] = "offscreen"
-            QgsApplication.setPrefixPath("/usr", False)
-    except Exception as e:
-        print("Error setting application path. \n" + str(e))
-
-    ##initialize the qgis session
-    try:
-        qgs = QgsApplication([], False)
-        qgs.initQgis()
-    except Exception as e:
-        print("Error initializing QGIS for analysis. \n" + str(e))
-
-    return qgs
-
-#exit the qgis environment
-def qgsAppExit(qgs):
-    time.sleep(1)
-    qgs.exitQgis()
-
-#format the strava url based on the user input
-def getStravaLayer(urlKeysEntry):
-
-    #basic checks for missing elements of the cookie information
-    if urlKeysEntry == None:
-        print("No information passed. Please input correct parameter and try again. ")
-        exit()
-    elif (urlKeysEntry.find("Key-Pair-Id") == -1):
-        print("Key-Pair-Id incorrect.")
-        exit()
-    elif (urlKeysEntry.find("Policy") == -1):
-        print("Policy incorrect.")
-        exit()
-    elif (urlKeysEntry.find("Signature") == -1):
-        print("Signature incorrect.")
-        exit()
-
-    #after the word red, the url needs to be encoded up to the end of the signature key in the cookies
-    urlStart = "type=xyz&url=https://heatmap-external-a.strava.com/tiles-auth/all/blue/"
-    urlZoomSet = "{z}/{x}/{y}.png"
-    urlQ = "?"
-    urlKeys = urlKeysEntry
-    urlZoomParams = "&zmax=12&zmin=0"
-
-    #configure the url and initialize the conection to Strava
-    try:
-        #format the url
-        url = urlStart + urllib.parse.quote(urlZoomSet) + urlQ + urllib.parse.quote(urlKeys) + urlZoomParams
-                
-        #create the xyz tile connection
-        strava_raster = QgsRasterLayer(url, "Red", "wms")
-
-    except Exception as e:
-        print("Error initializing the connection to Strava. \nThere is a problem with the url provided. Please ensure url is formatted correctly and try again.\n" + str(e))
-        exit()
-
-    return strava_raster
-
-#get the strava data and the bands of the raster
-def extractRasterBands(strava_raster, geoframe):
-
-    #this should always be true
-    if (strava_raster.isValid() == True):
-        try:
-            #set the pipe and provider based on the strava raster layer
-            pipe = QgsRasterPipe()
-            provider = strava_raster.dataProvider()
-            pipe.set(provider.clone())
-        except Exception as e:
-            print("Error writing file. " + str(e))
-
-        #create a qgs rectangle based on the geoframe
-        try:
-            input_qgs_rect = QgsRectangle(geoframe.total_bounds[0], geoframe.total_bounds[1], geoframe.total_bounds[2], geoframe.total_bounds[3])
-        except Exception as e:
-            print("Error obtaining the shapefile. Is it in a shapefile? " + str(e))
-
-        #computes the resolution, should be a whole number
-        try:
-            pixel_size = 100  #meters (approximately)
-            xres = int((input_qgs_rect.xMaximum() - input_qgs_rect.xMinimum()) / pixel_size)
-            yres = int((input_qgs_rect.yMaximum() - input_qgs_rect.yMinimum()) / pixel_size)
-        except Exception as e:
-            print("Error formatting resolution. " + str(e))
-            exit()
-    else:
-        print("Raster layer was invalid, please ensure the url parameters you entered were correct. ")
-        exit()
-
-    #block the raster to get the data based on the qgis rectangle
-    # this fails if the study areas is too large - threshold for failure is unknown
-    try:
-        raster_bands = provider.block(1, input_qgs_rect, xres, yres)
-    except Exception as e:
-        print("Error converting to byte array. " + str(e))
-        exit()
-    except QgsException as e:
-        print("Timer exception. ")
-        exit()
-    try:
-        byte_array = raster_bands.data()
-    except Exception as e:
-        print("Error converting to byte array. " + str(e))
-        exit()
-
-    #convert to a numpy array
-    numpy_array = np.frombuffer(byte_array.data(), dtype=np.uint8)
-    #reshape the array based on the number of bands
-    reshaped_array = np.reshape(numpy_array, (yres, xres, 4))
-
-    return reshaped_array, xres, yres, input_qgs_rect
-
 #perform operations on the array to format it for the TrajectoryCollection
-def arrayOperations(geoframe, reshaped_array, xres, yres, input_qgs_rect):           
+def pointArrayOperations(geoframe, reshaped_array, xres, yres, input_qgs_rect):           
 
     #get the crs of the original geoframe to return it to the user as it was given
     geo_crs = geoframe.crs
@@ -183,8 +39,6 @@ def arrayOperations(geoframe, reshaped_array, xres, yres, input_qgs_rect):
     pixel_y_size = (input_qgs_rect.yMaximum() - input_qgs_rect.yMinimum()) / (reshaped_array.shape[0])
     xmin = input_qgs_rect.xMinimum()
     ymin = input_qgs_rect.yMinimum()
-    xmax = input_qgs_rect.xMaximum()
-    ymax = input_qgs_rect.yMaximum()
     data = []
 
     #make a grid of x and y coordinates
@@ -227,7 +81,7 @@ def arrayOperations(geoframe, reshaped_array, xres, yres, input_qgs_rect):
     return df, pixel_x_size, pixel_y_size
 
 #combine the dataframes together
-def combineFrames(bandGdf, geoframe, pixel_x_size, pixel_y_size):
+def computePointNearest(bandGdf, geoframe, pixel_x_size, pixel_y_size):
 
     maxBandValue = 255
 
@@ -272,7 +126,7 @@ def combineFrames(bandGdf, geoframe, pixel_x_size, pixel_y_size):
     return geoframe
 
 #produce graphs and figures
-def produceOutputs(intersection_gdf, moveapps_io):
+def producePointOutputs(intersection_gdf, moveapps_io):
     try:
         #filter based on only above 0 band values
         criteria = (intersection_gdf['band_1'] > 0) | (intersection_gdf['band_2'] > 0) | (intersection_gdf['band_3'] > 0)
@@ -313,7 +167,7 @@ def produceOutputs(intersection_gdf, moveapps_io):
     ########################### 
     except Exception as e:
         print("Couldn't generate figures. " + str(e))
-        
+
 #revert back to movingpandas TrajectoryCollection
 def gpdToMpd(gpd):
     return mpd.TrajectoryCollection(gpd, "trackId", t="timestamps", crs=gpd.crs)

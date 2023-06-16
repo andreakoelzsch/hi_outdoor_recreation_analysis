@@ -1,8 +1,8 @@
 import movingpandas as mpd
 import geopandas as gpd
 import numpy as np
+from rtree import index
 from shapely.geometry import Point, MultiLineString
-from scipy.spatial import cKDTree
 import math
 
 #convert to a line gdf
@@ -22,7 +22,6 @@ def convertToLineGDF(data):
     if ((int(frame.total_bounds[2]) - int(frame.total_bounds[0])) > 500000) | ((int(frame.total_bounds[3]) - int(frame.total_bounds[1])) > 500000):
         print("Study size is too large, please subset your data to an area smaller than 500,000 metres by 500,000 metres and try again. Try using a smaller number of individuals from the dataset. ")
         exit()
-    print(frame)
     return frame
 
 #perform operations on the array to format it for the TrajectoryCollection
@@ -79,77 +78,30 @@ def cellPointArray(geoframe, reshaped_array, xres, yres, input_qgs_rect):
 
 #combine the dataframes together
 def computePointNearest(bandGdf, geoframe, pixel_x_size, pixel_y_size):
+    print(geoframe)
+    idx = index.Index()
+    for i, geometry in enumerate(geoframe['geometry']):
+        print(i)
+        idx.insert(i, geometry.bounds)
+    distance_threshold = 75.0
+    point_counts = []
+    count = 0
+    print(len(bandGdf))
+    for point in bandGdf['geometry']:
+        print(count, end='')
+        candidate_indices = list(idx.intersection(point.buffer(distance_threshold).bounds))
+        candidate_multilinestrings = geoframe.loc[candidate_indices]
 
-    maxBandValue = 255
-    hypotenuse = math.sqrt((pixel_x_size*pixel_x_size) + (pixel_y_size*pixel_y_size))
-    # Assuming you have two GeoDataFrames: points_gdf and multilinestrings_gdf
+        # Perform the actual distance check
+        within_distance_mask = candidate_multilinestrings['geometry'].distance(point) <= distance_threshold
 
-    # Create a spatial index for the points GeoDataFrame
-    points_spatial_index = bandGdf.sindex
-
-    # Define the distance threshold and average value column name
-    distance_threshold = hypotenuse  # Adjust as per your requirement
-
-    # Iterate over each multilinestring in the multilinestrings GeoDataFrame
-    for idx, row in geoframe.iterrows():
-        multilinestring = row['geometry']
-        
-        # Create a bounding box around the multilinestring with the distance threshold
-        bounding_box = multilinestring.buffer(distance_threshold).bounds
-        
-        # Use the spatial index to find candidate points within the bounding box
-        candidate_indices = list(points_spatial_index.intersection(bounding_box))
-        candidate_points = bandGdf.iloc[candidate_indices]
-        
-        # Filter candidate points within the distance threshold from the multilinestring
-        filtered_points = candidate_points[candidate_points.distance(multilinestring) <= distance_threshold]
-        
         # Count the number of points within the distance threshold
-        point_count = len(filtered_points)
-        
-        # Calculate the average value associated with the filtered points
-        average_value = filtered_points['intensity'].mean()
-        
-        # Assign count and average value to the respective multilinestring
-        geoframe.loc[idx, 'point_count'] = point_count
-        geoframe.loc[idx, 'average_value'] = average_value
-    # #extract coords
-    # geoframe_coords = [(geom.x, geom.y) for geom in geoframe.geometry]
-
-    # #extract coords
-    # bandGdf_coords = [(geom.x, geom.y) for geom in bandGdf.geometry]
-
-    # #create kdtree for searching
-    # tree = cKDTree(bandGdf_coords)
-
-    # #get nearest neighbors and distances
-    # distances, indices = tree.query(geoframe_coords)
-
-    # #assign the nearest neighbor distances to a new column
-    # geoframe['nearest_distance'] = distances
-
-    # #extract band values
-    # band1_values = bandGdf.loc[indices, 'band_1'].tolist()
-    # band2_values = bandGdf.loc[indices, 'band_2'].tolist()
-    # band3_values = bandGdf.loc[indices, 'band_3'].tolist()
-    # band4_values = bandGdf.loc[indices, 'band_4'].tolist()
-
-    # #append the band values to the geoframe
-    # geoframe['band_1'] = band1_values
-    # geoframe['band_2'] = band2_values
-    # geoframe['band_3'] = band3_values
-    # geoframe['band_4'] = band4_values
-    
-    # #set radius for the distance to include/exclude
-    # hypotenuse = math.sqrt((pixel_x_size*pixel_x_size) + (pixel_y_size*pixel_y_size))
-
-    # #calculate intensity based on the band values and distances
-    # selected_columns = ["band_1", "band_2", "band_3"]
-    # geoframe['intensity'] = (geoframe[selected_columns].sum(axis=1) / (maxBandValue*3))
-
-    # #if the distance is too far, set the values to na
-    # criterion = geoframe['nearest_distance'] > (hypotenuse / 2)
-    # geoframe.loc[criterion, ['band_1', 'band_2', 'band_3', 'intensity']] = np.nan
+        point_count = sum(within_distance_mask)
+        point_counts.append(point_count)
+        print('\r', end='')
+        count += 1
+    geoframe['point_count'] = point_counts
+    print(geoframe)
     exit()
     return geoframe
 

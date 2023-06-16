@@ -29,7 +29,7 @@ def convertToPointGpd(data):
     return frame
 
 #perform operations on the array to format it for the TrajectoryCollection
-def pointArrayOperations(geoframe, reshaped_array, xres, yres, input_qgs_rect):           
+def cellPointArray(geoframe, reshaped_array, xres, yres, input_qgs_rect):           
 
     #get the crs of the original geoframe to return it to the user as it was given
     geo_crs = geoframe.crs

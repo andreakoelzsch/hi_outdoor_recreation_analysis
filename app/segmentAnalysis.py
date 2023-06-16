@@ -78,6 +78,7 @@ def cellPointArray(geoframe, reshaped_array, xres, yres, input_qgs_rect):
 
 #combine the dataframes together
 def computePointNearest(bandGdf, geoframe, pixel_x_size, pixel_y_size):
+    #this is not working correctly, it is not what I want
     print(geoframe)
     idx = index.Index()
     for i, geometry in enumerate(geoframe['geometry']):
